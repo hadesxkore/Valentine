@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Love Journey</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .number-card {
+            animation: float 3s ease-in-out infinite;
+            backdrop-filter: blur(8px);
+        }
+        .heart-icon {
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+        .photo-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            height: 300px; /* Increased height */
+            overflow: hidden;
+        }
+        .photo-card:hover {
+            transform: translateY(-10px) rotate(2deg);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        /* Click Me Overlay */
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .photo-card:hover .click-overlay {
+            opacity: 1;
+        }
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 50;
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+        }
+        .modal img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+        }
+        .modal-show {
+            display: block;
+        }
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .floating-heart {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.6;
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-pink-50 to-purple-100 min-h-screen">
+    <!-- Floating Hearts Background -->
+
+
+      <!-- Modal & Overlay -->
+      <div id="modal-overlay" class="modal-overlay" onclick="closeModal()"></div>
+      <div id="image-modal" class="modal">
+          <img id="modal-img" src="" alt="Enlarged View">
+          <p id="modal-text" class="text-pink-600 mt-4"></p>
+          <button onclick="closeModal()" class="mt-4 bg-pink-500 text-white px-6 py-2 rounded-full hover:bg-pink-600">Close</button>
+      </div>
+
+    <div class="floating-hearts" id="heartsContainer"></div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Title Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-pink-600 mb-2">Our Love Journey</h1>
+            <p class="text-xl text-purple-600">Started on November 10, 2023</p>
+            <div class="heart-icon text-5xl mt-4">💑</div>
+        </div>
+
+<!-- Time Counter Section -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+    <!-- Row 1: Years & Months -->
+    <div class="number-card bg-gradient-to-br from-rose-200 via-pink-300 to-rose-100 p-8 rounded-2xl shadow-lg text-center backdrop-blur-md">
+        <h2 class="text-5xl font-bold text-rose-600 drop-shadow-md">
+            <span id="years">0</span> Years & <span id="months">0</span> Months
+        </h2>
+        <p class="text-lg text-pink-600 mt-2 font-medium">Together Since November 10, 2023 ❤️</p>
+    </div>
+
+    <!-- Row 1: Days -->
+    <div class="number-card bg-gradient-to-br from-pink-200 via-rose-300 to-pink-100 p-8 rounded-2xl shadow-lg text-center backdrop-blur-md">
+        <h2 class="text-5xl font-bold text-rose-600 drop-shadow-md">
+            <span id="days">0</span> Days
+        </h2>
+        <p class="text-lg text-pink-600 mt-2 font-medium">And Counting... 💕</p>
+    </div>
+
+    <!-- Row 2: Timer -->
+    <div class="col-span-1 md:col-span-2 number-card bg-gradient-to-br from-rose-100 via-pink-200 to-rose-100 p-8 rounded-2xl shadow-lg text-center backdrop-blur-md">
+        <div class="flex justify-center space-x-8">
+            <div class="text-4xl font-bold text-rose-600 drop-shadow-md">
+                <span id="hours">00</span><br>
+                <span class="text-sm text-rose-500 font-medium">Hours</span>
+            </div>
+            <div class="text-4xl font-bold text-rose-600 drop-shadow-md">
+                <span id="minutes">00</span><br>
+                <span class="text-sm text-rose-500 font-medium">Minutes</span>
+            </div>
+            <div class="text-4xl font-bold text-rose-600 drop-shadow-md">
+                <span id="seconds">00</span><br>
+                <span class="text-sm text-rose-500 font-medium">Seconds</span>
+            </div>
+        </div>
+        <p class="text-lg text-pink-600 mt-4 font-medium">Every Moment with You is Love 💘</p>
+    </div>
+</div>
+
+      <!-- Gallery Section -->
+    <div class="container mx-auto px-4 py-8">
+       
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <div class="photo-card bg-white rounded-2xl overflow-hidden shadow-lg" onclick="openModal('assets/8.jpg', 'Our First Date 💖')">
+                <img src="assets/8.jpg" alt="Us 1" class="w-full h-full object-cover">
+                <div class="click-overlay">Click Me</div>
+            </div>
+            <div class="photo-card bg-white rounded-2xl overflow-hidden shadow-lg" onclick="openModal('assets/15.jpg', 'Special Moments 💕')">
+                <img src="assets/15.jpg" alt="Us 2" class="w-full h-full object-cover">
+                <div class="click-overlay">Click Me</div>
+            </div>
+            <div class="photo-card bg-white rounded-2xl overflow-hidden shadow-lg" onclick="openModal('assets/5.jpg', 'Forever Together 💝')">
+                <img src="assets/5.jpg" alt="Us 3" class="w-full h-full object-cover">
+                <div class="click-overlay">Click Me</div>
+            </div>
+        </div>
+    </div>
+        <!-- Next Button -->
+        <div class="text-center">
+            <button onclick="window.location.href='gallery.html'" 
+                    class="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-8 py-3 rounded-full 
+                           text-lg font-semibold hover:from-pink-600 hover:to-purple-600 
+                           transform hover:scale-105 transition-all duration-300 shadow-lg">
+                View Our Gallery 📸
+            </button>
+        </div>
+    </div>
+
+    <audio id="loveSong8" src="assets/i-love-you-too-much.mp3"></audio>
+    <audio id="loveSong15" src="assets/i-see-the-light.mp3"></audio>
+    <audio id="loveSong5" src="assets/a-whole-new-world.mp3"></audio>
+    <audio id="chillMusic" src="assets/chill2.mp3" autoplay loop></audio>
+
+
+    <script>
+        // Floating hearts background
+        function createFloatingHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.top = Math.random() * 100 + 'vh';
+            heart.style.animationDelay = Math.random() * 2 + 's';
+            document.getElementById('heartsContainer').appendChild(heart);
+            
+            setTimeout(() => heart.remove(), 3000);
+        }
+
+        setInterval(createFloatingHeart, 500);
+
+// Time counter function
+function updateTimer() {
+    const startDate = new Date('2023-11-10T00:00:00');
+    const now = new Date();
+    const diff = now - startDate;
+
+    // Calculate time units
+    const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
+    const months = Math.floor((diff % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30.44));
+    const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+
+    // Update DOM
+    document.getElementById('years').textContent = years;
+    document.getElementById('months').textContent = months;
+    document.getElementById('days').textContent = totalDays;
+    document.getElementById('hours').textContent = hours;
+    document.getElementById('minutes').textContent = minutes;
+    document.getElementById('seconds').textContent = seconds;
+}
+
+// Update timer every second
+updateTimer();
+setInterval(updateTimer, 1000);
+function openModal(imageSrc, text) {
+        document.getElementById('modal-img').src = imageSrc;
+        document.getElementById('modal-text').textContent = text;
+        document.getElementById('modal-overlay').classList.add('modal-show');
+        document.getElementById('image-modal').classList.add('modal-show');
+
+        // Stop any playing music first
+        stopAllMusic();
+
+        // Play music based on the image clicked
+        if (imageSrc === "assets/8.jpg") {
+            document.getElementById('loveSong8').play();
+        } else if (imageSrc === "assets/15.jpg") {
+            document.getElementById('loveSong15').play();
+        } else if (imageSrc === "assets/5.jpg") {
+            document.getElementById('loveSong5').play();
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('modal-overlay').classList.remove('modal-show');
+        document.getElementById('image-modal').classList.remove('modal-show');
+
+        // Stop all music when closing modal
+        stopAllMusic();
+    }
+
+    function stopAllMusic() {
+        document.getElementById('loveSong8').pause();
+        document.getElementById('loveSong8').currentTime = 0;
+
+        document.getElementById('loveSong15').pause();
+        document.getElementById('loveSong15').currentTime = 0;
+
+        document.getElementById('loveSong5').pause();
+        document.getElementById('loveSong5').currentTime = 0;
+    }
+    // Play background music when the page loads
+window.onload = function() {
+    document.getElementById('chillMusic').play();
+};
+
+// Function to stop the chill music
+function stopChillMusic() {
+    document.getElementById('chillMusic').pause();
+}
+
+// Modify stopAllMusic to stop chill music when modal music plays
+function stopAllMusic() {
+    stopChillMusic(); // Stop background music when playing modal music
+
+    document.getElementById('loveSong8').pause();
+    document.getElementById('loveSong8').currentTime = 0;
+
+    document.getElementById('loveSong15').pause();
+    document.getElementById('loveSong15').currentTime = 0;
+
+    document.getElementById('loveSong5').pause();
+    document.getElementById('loveSong5').currentTime = 0;
+}
+    </script>
+</body>
+</html>

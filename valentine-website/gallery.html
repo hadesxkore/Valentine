@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Love Gallery</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Previous animations remain the same */
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .gallery-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            padding: 0 20px;
+        }
+
+        .ladder-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, #ff69b4, #9f7aea);
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+
+        .image-card {
+            width: 400px;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .image-card.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .image-wrapper {
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .image-wrapper:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        .date-badge {
+            position: absolute;
+            top: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            color: #ff69b4;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        /* Responsive Styles */
+        @media (min-width: 768px) {
+            .image-card.left {
+                margin-right: auto;
+                margin-left: 50px;
+                transform: translateX(-50px);
+            }
+
+            .image-card.right {
+                margin-left: auto;
+                margin-right: 50px;
+                transform: translateX(50px);
+            }
+
+            .image-card::after {
+                content: '';
+                position: absolute;
+                width: 50px;
+                height: 4px;
+                background: linear-gradient(to right, #ff69b4, #9f7aea);
+                top: 50%;
+                z-index: 1;
+            }
+
+            .image-card.left::after {
+                right: -50px;
+            }
+
+            .image-card.right::after {
+                left: -50px;
+            }
+
+            .left .date-badge {
+                right: 1rem;
+                transform: translateX(20px);
+            }
+
+            .right .date-badge {
+                left: 1rem;
+                transform: translateX(-20px);
+            }
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 767px) {
+            .gallery-container {
+                padding: 0 15px;
+            }
+
+            .image-card {
+                width: 100%;
+                margin: 0 auto;
+            }
+
+            .ladder-line {
+                left: 20px;
+            }
+
+            .image-card::after {
+                content: '';
+                position: absolute;
+                width: 20px;
+                height: 4px;
+                background: linear-gradient(to right, #ff69b4, #9f7aea);
+                left: -20px;
+                top: 50%;
+                z-index: 1;
+            }
+
+            .date-badge {
+                left: 1rem;
+                opacity: 1;
+                transform: none;
+            }
+
+            .image-wrapper {
+                margin-left: 30px;
+            }
+
+            .space-y-20 > :not([hidden]) ~ :not([hidden]) {
+                --tw-space-y-reverse: 0;
+                margin-top: calc(3rem * calc(1 - var(--tw-space-y-reverse)));
+                margin-bottom: calc(3rem * var(--tw-space-y-reverse));
+            }
+        }
+
+        
+          /* Modal Container */
+          .modal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-container.active {
+            display: flex;
+        }
+
+     /* Envelope Container */
+.envelope-wrapper {
+    position: relative;
+    width: 220px;
+    height: 160px;
+    perspective: 800px;
+}
+
+      /* Envelope Base */
+.envelope {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #f9a8d4;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    overflow: hidden;
+}
+
+        .envelope.opening {
+            transform: translateY(-50px);
+        }
+
+        .envelope.open {
+            transform: translateY(-100px);
+        }
+
+       /* Envelope Flap */
+.envelope-flap {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 50%;
+    background: #f472b6;
+    clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+    transform-origin: top;
+    transition: transform 0.8s ease-in-out;
+}
+
+/* Love Letter */
+.love-letter {
+    position: absolute;
+    width: 90%;
+    height: 120px;
+    background: white;
+    border-radius: 5px;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(80%);
+    opacity: 0;
+    transition: transform 1s ease-in-out, opacity 1s ease-in-out;
+}
+
+
+       /* Envelope Open Animations */
+.envelope.open .envelope-flap {
+    transform: rotateX(180deg);
+}
+
+.envelope.open .love-letter {
+    transform: translateY(0%);
+    opacity: 1;
+}
+
+
+        .flap-heart {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+        }
+
+        /* Love Letter Modal */
+        .love-letter-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            width: 400px;
+            display: none;
+            z-index: 1001;
+        }
+
+        .love-letter-modal.active {
+            display: block;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Floating Hearts */
+        .floating-heart {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.6;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-pink-50 to-purple-100 min-h-screen pb-20">
+    <!-- Header -->
+    <header class="text-center py-8 md:py-12">
+        <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
+            Our Love Story
+        </h1>
+        <p class="text-pink-600 mt-2">Every step of our journey together 💝</p>
+    </header>
+
+    <!-- Gallery Container -->
+    <div class="gallery-container">
+        <!-- Vertical Line -->
+        <div class="ladder-line"></div>
+
+        <!-- Image Cards -->
+        <div class="space-y-20">
+            <!-- Image 1 -->
+            <div class="image-card left">
+                <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <img src="assets/z12.jpg" alt="Memory 1" class="w-full h-80 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-pink-600 font-semibold">Our First Concert</h3>
+                        <p class="text-gray-600 text-sm">A magical beginning...</p>
+                    </div>
+                    <span class="date-badge">Nov 10, 2023</span>
+                </div>
+            </div>
+
+            <!-- Image 2 -->
+            <div class="image-card right">
+                <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <img src="assets/z11.jpg" alt="Memory 2" class="w-full h-80 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-pink-600 font-semibold">Your First Birthday</h3>
+                        <p class="text-gray-600 text-sm">Cozy moments together...</p>
+                    </div>
+                    <span class="date-badge">Nov 15, 2023</span>
+                </div>
+            </div>
+
+            <!-- Image 3 -->
+            <div class="image-card left">
+                <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <img src="assets/z25.jpg" alt="Memory 3" class="w-full h-80 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-pink-600 font-semibold">Wetland</h3>
+                        <p class="text-gray-600 text-sm">Our first Wetland together...</p>
+                    </div>
+                    <span class="date-badge">Dec 25, 2023</span>
+                </div>
+            </div>
+
+            <!-- Image 4 -->
+            <div class="image-card right">
+                <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <img src="assets/z24.jpg" alt="Memory 4" class="w-full h-80 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-pink-600 font-semibold">First Wallpaper</h3>
+                        <p class="text-gray-600 text-sm">Our very first wallpaper...</p>
+                    </div>
+                    <span class="date-badge">Jan 1, 2024</span>
+                </div>
+            </div>
+
+            <!-- Image 5 -->
+            <div class="image-card left">
+                <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <img src="assets/z19.jpg" alt="Memory 5" class="w-full h-80 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-pink-600 font-semibold">Weekend Adventure</h3>
+                        <p class="text-gray-600 text-sm">Exploring new places together...</p>
+                    </div>
+                    <span class="date-badge">Jan 15, 2024</span>
+                </div>
+            </div>
+
+            <!-- Image 6 -->
+            <div class="image-card right">
+                <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <img src="assets/z6.jpg" alt="Memory 6" class="w-full h-80 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-pink-600 font-semibold">Joyful</h3>
+                        <p class="text-gray-600 text-sm">Simple moments, precious memories...</p>
+                    </div>
+                    <span class="date-badge">Jan 28, 2024</span>
+                </div>
+            </div>
+
+            <!-- Image 7 -->
+            <div class="image-card left">
+                <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <img src="assets/z7.jpg" alt="Memory 7" class="w-full h-80 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-pink-600 font-semibold">Joyful Day</h3>
+                        <p class="text-gray-600 text-sm">Sunset and sweet moments...</p>
+                    </div>
+                    <span class="date-badge">Feb 1, 2024</span>
+                </div>
+            </div>
+
+            <!-- Image 8 -->
+            <div class="image-card right">
+                <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <img src="assets/z8.jpg" alt="Memory 8" class="w-full h-80 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-pink-600 font-semibold">Matchy Outfit</h3>
+                        <p class="text-gray-600 text-sm">Chill nature date together...</p>
+                    </div>
+                    <span class="date-badge">Feb 5, 2024</span>
+                </div>
+            </div>
+
+            <!-- Image 9 -->
+            <div class="image-card left">
+                <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <img src="assets/z9.jpg" alt="Memory 9" class="w-full h-80 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-pink-600 font-semibold">Mirror Picture</h3>
+                        <p class="text-gray-600 text-sm">A very cute mirror pic together...</p>
+                    </div>
+                    <span class="date-badge">Feb 7, 2024</span>
+                </div>
+            </div>
+
+            <!-- Image 10 -->
+            <div class="image-card right">
+                <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <img src="assets/z14.jpg" alt="Memory 10" class="w-full h-80 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-pink-600 font-semibold">Cutesy kiss</h3>
+                        <p class="text-gray-600 text-sm">Just enjoying your clingy side...</p>
+                    </div>
+                    <span class="date-badge">Feb 8, 2024</span>
+                </div>
+            </div>
+        </div>
+
+        
+            <!-- Image 9 -->
+            <div class="image-card left">
+                <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <img src="assets/z13.jpg" alt="Memory 9" class="w-full h-80 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-pink-600 font-semibold">Nature Adventure</h3>
+                        <p class="text-gray-600 text-sm">Another windy nature with you...</p>
+                    </div>
+                    <span class="date-badge">Feb 7, 2024</span>
+                </div>
+            </div>
+
+             <!-- Image 10 -->
+             <div class="image-card right">
+                <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <img src="assets/z1.jpg" alt="Memory 10" class="w-full h-80 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-pink-600 font-semibold">Well deserved cert</h3>
+                        <p class="text-gray-600 text-sm">The outcome of your hardwork...</p>
+                    </div>
+                    <span class="date-badge">Feb 8, 2024</span>
+                </div>
+            </div>
+
+ <!-- Image 9 -->
+ <div class="image-card left">
+    <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+        <img src="assets/z16.jpg" alt="Memory 9" class="w-full h-80 object-cover">
+        <div class="p-4">
+            <h3 class="text-pink-600 font-semibold">Christmas Day</h3>
+            <p class="text-gray-600 text-sm">Our 2nd Christmas Together...</p>
+        </div>
+        <span class="date-badge">Feb 7, 2024</span>
+    </div>
+</div>
+
+   <!-- Image 10 -->
+   <div class="image-card right">
+    <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+        <img src="assets/z17.jpg" alt="Memory 10" class="w-full h-80 object-cover">
+        <div class="p-4">
+            <h3 class="text-pink-600 font-semibold">Tourism Park</h3>
+            <p class="text-gray-600 text-sm">A very demure pic of us...</p>
+        </div>
+        <span class="date-badge">Feb 8, 2024</span>
+    </div>
+</div>
+
+<!-- Image 9 -->
+<div class="image-card left">
+    <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+        <img src="assets/z15.jpg" alt="Memory 9" class="w-full h-80 object-cover">
+        <div class="p-4">
+            <h3 class="text-pink-600 font-semibold">New year's eve</h3>
+            <p class="text-gray-600 text-sm">Our 2nd New year's eve together...</p>
+        </div>
+        <span class="date-badge">Feb 7, 2024</span>
+    </div>
+</div>
+
+
+ <!-- Image 10 -->
+ <div class="image-card right">
+    <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+        <img src="assets/z22.jpg" alt="Memory 10" class="w-full h-80 object-cover">
+        <div class="p-4">
+            <h3 class="text-pink-600 font-semibold">Cutesy</h3>
+            <p class="text-gray-600 text-sm">We are so freaking cute love...</p>
+        </div>
+        <span class="date-badge">Feb 8, 2024</span>
+    </div>
+</div>
+
+<!-- Image 9 -->
+<div class="image-card left">
+    <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+        <img src="assets/z3.jpg" alt="Memory 9" class="w-full h-80 object-cover">
+        <div class="p-4">
+            <h3 class="text-pink-600 font-semibold">Random</h3>
+            <p class="text-gray-600 text-sm">Fun and laughter all night...</p>
+        </div>
+        <span class="date-badge">Feb 7, 2024</span>
+    </div>
+</div>
+
+
+ <!-- Image 10 -->
+ <div class="image-card right">
+    <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+        <img src="assets/z4.jpg" alt="Memory 10" class="w-full h-80 object-cover">
+        <div class="p-4">
+            <h3 class="text-pink-600 font-semibold">Random</h3>
+            <p class="text-gray-600 text-sm">Celebrating our love...</p>
+        </div>
+        <span class="date-badge">Feb 8, 2024</span>
+    </div>
+</div>
+
+
+<!-- Image 9 -->
+<div class="image-card left">
+    <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+        <img src="assets/z18.jpg" alt="Memory 9" class="w-full h-80 object-cover">
+        <div class="p-4">
+            <h3 class="text-pink-600 font-semibold">Random</h3>
+            <p class="text-gray-600 text-sm">Fun and laughter all night...</p>
+        </div>
+        <span class="date-badge">Feb 7, 2024</span>
+    </div>
+</div>
+
+
+ <!-- Image 10 -->
+ <div class="image-card right">
+    <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+        <img src="assets/z23.jpg" alt="Memory 10" class="w-full h-80 object-cover">
+        <div class="p-4">
+            <h3 class="text-pink-600 font-semibold">Random</h3>
+            <p class="text-gray-600 text-sm">Celebrating our love...</p>
+        </div>
+        <span class="date-badge">Feb 8, 2024</span>
+    </div>
+</div>
+
+<!-- Image 9 -->
+<div class="image-card left">
+    <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+        <img src="assets/2.jpg" alt="Memory 9" class="w-full h-80 object-cover">
+        <div class="p-4">
+            <h3 class="text-pink-600 font-semibold">Random</h3>
+            <p class="text-gray-600 text-sm">Fun and laughter all night...</p>
+        </div>
+        <span class="date-badge">Feb 7, 2024</span>
+    </div>
+</div>
+
+
+ <!-- Image 10 -->
+ <div class="image-card right">
+    <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+        <img src="assets/1.jpg" alt="Memory 10" class="w-full h-80 object-cover">
+        <div class="p-4">
+            <h3 class="text-pink-600 font-semibold">Random</h3>
+            <p class="text-gray-600 text-sm">Celebrating our love...</p>
+        </div>
+        <span class="date-badge">Feb 8, 2024</span>
+    </div>
+</div>
+
+
+<!-- Image 9 -->
+<div class="image-card left">
+    <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+        <img src="assets/3.jpg" alt="Memory 9" class="w-full h-80 object-cover">
+        <div class="p-4">
+            <h3 class="text-pink-600 font-semibold">Random</h3>
+            <p class="text-gray-600 text-sm">Fun and laughter all night...</p>
+        </div>
+        <span class="date-badge">Feb 7, 2024</span>
+    </div>
+</div>
+
+
+ <!-- Image 10 -->
+ <div class="image-card right">
+    <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+        <img src="assets/6.jpg" alt="Memory 10" class="w-full h-80 object-cover">
+        <div class="p-4">
+            <h3 class="text-pink-600 font-semibold">Random</h3>
+            <p class="text-gray-600 text-sm">Celebrating our love...</p>
+        </div>
+        <span class="date-badge">Feb 8, 2024</span>
+    </div>
+</div>
+
+
+<!-- Image 9 -->
+<div class="image-card left">
+    <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+        <img src="assets/8.jpg" alt="Memory 9" class="w-full h-80 object-cover">
+        <div class="p-4">
+            <h3 class="text-pink-600 font-semibold">Random</h3>
+            <p class="text-gray-600 text-sm">Fun and laughter all night...</p>
+        </div>
+        <span class="date-badge">Feb 7, 2024</span>
+    </div>
+</div>
+
+
+ <!-- Image 10 -->
+ <div class="image-card right">
+    <div class="image-wrapper bg-white rounded-2xl shadow-xl overflow-hidden">
+        <img src="assets/9.jpg" alt="Memory 10" class="w-full h-80 object-cover">
+        <div class="p-4">
+            <h3 class="text-pink-600 font-semibold">Random</h3>
+            <p class="text-gray-600 text-sm">Celebrating our love...</p>
+        </div>
+        <span class="date-badge">Feb 8, 2024</span>
+    </div>
+</div>
+
+
+
+        </div>
+
+ <!-- Button -->
+ <div class="text-center mt-12">
+    <button id="loveButton" class="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+        You and Me 💕
+    </button>
+</div>
+   <!-- Envelope Container -->
+   <div id="modalContainer" class="modal-container">
+    <div class="envelope-wrapper">
+        <div class="envelope">
+            <div class="envelope-flap">
+                <div class="flap-heart">❤️</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+   <!-- Love Letter Modal -->
+   <div id="loveLetter" class="love-letter-modal">
+    <button class="close-button">&times;</button>
+    <div class="love-letter-content">
+        <h2 class="text-2xl font-bold text-pink-600 mb-4">My Dearest Love ❤️</h2>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            Hey, my love! This is our first time celebrating Valentine's Day together, especially after what happened with our schedule last year. But no matter what, we're still together and always will be. You're the one I want to be with forever. You give me love, care, and assurance, and I want to make sure you get everything you deserve. I'm so grateful to have met you.        </p>
+        <p class="text-gray-700 leading-relaxed mb-4">
+I will always support you in everything you want in life. I'll make sure I'm by your side no matter what. For your upcoming OJT, I hope you have a great experience because I know this is your dream and the life you want. I love you always, Mahal! More Valentine's Days with you—this is just the beginning. God bless us always! ❤️        </p>
+        <p class="text-pink-600 font-semibold">
+            Forever yours,<br>
+            With all my love ❤️
+        </p>
+    </div>
+</div>
+        
+
+    </div>
+
+    <audio id="chillMusic" src="assets/i-see-the-light.mp3" autoplay loop muted></audio>
+
+    <script>
+        // Create floating hearts
+        function createFloatingHeart() {
+            const heart = document.createElement('div');
+            heart.innerHTML = '❤️';
+            heart.className = 'floating-heart';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.top = Math.random() * 100 + 'vh';
+            heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            document.body.appendChild(heart);
+
+            setTimeout(() => heart.remove(), 3000);
+        }
+
+        setInterval(createFloatingHeart, 2000);
+
+        // Intersection Observer for scroll animations
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        // Add small delay for connected line animation
+                        setTimeout(() => {
+                            entry.target.querySelector('.image-wrapper').style.opacity = 1;
+                        }, 200);
+                    }
+                });
+            },
+            {
+                threshold: 0.2,
+                rootMargin: '50px'
+            }
+        );
+
+        // Observe all image cards
+        document.querySelectorAll('.image-card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // Initialize first card as visible
+        document.querySelector('.image-card').classList.add('visible');
+
+     // Wait for DOM to be fully loaded
+     document.addEventListener('DOMContentLoaded', function() {
+            // Get all necessary elements
+            const loveButton = document.getElementById('loveButton');
+            const modalContainer = document.getElementById('modalContainer');
+            const envelope = document.querySelector('.envelope');
+            const loveLetter = document.getElementById('loveLetter');
+            const closeButton = document.querySelector('.close-button');
+
+            // Debugging: Log elements to ensure they exist
+            console.log({ loveButton, modalContainer, envelope, loveLetter, closeButton });
+
+            // Make sure all elements exist before adding event listeners
+            if (loveButton && modalContainer && envelope && loveLetter && closeButton) {
+                loveButton.addEventListener('click', () => {
+                    modalContainer.classList.add('active');
+                    // Slower, smoother animation sequence
+                    setTimeout(() => {
+                        envelope.classList.add('opening');
+                        setTimeout(() => {
+                            envelope.classList.add('open');
+                            setTimeout(() => {
+                                loveLetter.classList.add('active');
+                                createFloatingHearts();
+                            }, 1000);
+                        }, 1500);
+                    }, 800);
+                });
+
+                closeButton.addEventListener('click', () => {
+                    loveLetter.classList.remove('active');
+                    setTimeout(() => {
+                        modalContainer.classList.remove('active');
+                        envelope.classList.remove('open', 'opening');
+                    }, 300);
+                });
+
+                modalContainer.addEventListener('click', (e) => {
+                    if (e.target === modalContainer) {
+                        loveLetter.classList.remove('active');
+                        setTimeout(() => {
+                            modalContainer.classList.remove('active');
+                            envelope.classList.remove('open', 'opening');
+                        }, 300);
+                    }
+                });
+            } else {
+                console.error('One or more elements are missing in the DOM.');
+            }
+
+            function createFloatingHearts() {
+                for (let i = 0; i < 5; i++) {
+                    const heart = document.createElement('div');
+                    heart.innerHTML = '❤️';
+                    heart.className = 'floating-heart';
+                    heart.style.left = Math.random() * 100 + '%';
+                    heart.style.top = Math.random() * 100 + '%';
+                    heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                    loveLetter.appendChild(heart);
+                    
+                    setTimeout(() => heart.remove(), 3000);
+                }
+            }
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+    const music = document.getElementById("chillMusic");
+
+    function tryToPlayMusic() {
+        if (music.paused) {
+            music.muted = false; // Unmute
+            music.play().then(() => {
+                console.log("Music is playing!");
+            }).catch(error => {
+                console.log("Autoplay blocked. Waiting for user interaction...");
+            });
+        }
+    }
+
+    // Try playing immediately
+    tryToPlayMusic();
+
+    // Listen for scroll event (detect actual movement)
+    let lastScrollY = window.scrollY;
+    function handleScroll() {
+        if (Math.abs(window.scrollY - lastScrollY) > 5) { // Detect small scroll movement
+            tryToPlayMusic();
+            document.removeEventListener("scroll", handleScroll);
+        }
+    }
+    document.addEventListener("scroll", handleScroll);
+
+    // Also play on click or mouse move
+    document.addEventListener("click", tryToPlayMusic, { once: true });
+    document.addEventListener("mousemove", tryToPlayMusic, { once: true });
+});
+
+    </script>
+</body>
+</html>
